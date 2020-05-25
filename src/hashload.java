@@ -15,12 +15,23 @@ public class hashload {
 	
 	   int hcounter=0;
 	   
+	     private ArrayList<HashNode> bucketArray; 
+		
+		 private int numBuckets; 
+	   
+		 public hashload() { 
+			   bucketArray = new ArrayList<>(); 
+			   
+			   numBuckets = 19000; 	 
+				
+			  
+			   for(int i = 0; i < numBuckets; i++) 
+				   bucketArray.add(null); 
+		   } 
 	public static void main(String[] args) throws IOException { 
 	int pageSize=0;
 	
-	 private ArrayList<HashNode> bucketArray; 
-	
-	 private int numBuckets; 
+	 
 	try{
 		pageSize = Integer.parseInt(args[0]);
 	   } catch(NumberFormatException e){
