@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -28,6 +29,18 @@ public class hashload {
 			   for(int i = 0; i < numBuckets; i++) 
 				   bucketArray.add(null); 
 		   } 
+		 
+		 public void add(String key, int value) {
+			 int nodecounter=0;
+			 }
+		 
+		 public void hashFunction(int pageSize) {
+			 File heapFile = new File("heap." + pageSize);
+			 
+			 trailingWhiteSpace = pageSize - (11 * RECORD_SIZE);
+			 
+			 boolean isNextPage = true;
+		 }
 	public static void main(String[] args) throws IOException { 
 	int pageSize=0;
 	
