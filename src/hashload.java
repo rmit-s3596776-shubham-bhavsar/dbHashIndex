@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -64,7 +65,46 @@ public class hashload {
 			 trailingWhiteSpace = pageSize - (11 * RECORD_SIZE);
 			 
 			 boolean isNextPage = true;
-		 }
+			 try {
+				   FileInputStream fis = new FileInputStream(heapFile);
+				         
+				   //run loop until there is no page left
+				   while(isNextPage) {
+					   byte[] page = new byte[pageSize];
+					   fis.read(page, 0, pageSize);
+					   String pageCheck = new String(page);
+					   if(pageCheck.trim().length() == 0) {
+						   isNextPage = false;
+						   break;
+					   }
+					   for(int i=0; i<page.length; i+=RECORD_SIZE) {
+						   if(i == Math.floor(pageSize/RECORD_SIZE)*RECORD_SIZE) {
+							   position+=trailingWhiteSpace;
+							   break;
+						   } else {
+							   position+=RECORD_SIZE;
+						   }
+						   byte[] bName = new byte[BUILDINGNAME_SIZE];
+						   System.arraycopy(page, i+BNAME_OFFSET, bName, 0, 65);
+						   String name = new String(bName).trim();
+						   
+						   if(!(name.equalsIgnoreCase("null")) && !(name.equalsIgnoreCase(""))) {
+							   add(name, position);
+						   }
+							   
+					   }
+				   }
+				   fis.close();
+
+				   System.out.println("Completed");
+
+			   } catch (FileNotFoundException e) {
+				   e.printStackTrace();
+			   } catch (IOException e) {
+				   e.printStackTrace();
+			   }
+		   }
+		 
 	public static void main(String[] args) throws IOException { 
 	int pageSize=0;
 	
