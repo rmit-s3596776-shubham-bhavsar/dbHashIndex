@@ -1,7 +1,26 @@
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+
+class HashNode 
+{ 
+	//Building name
+	String key; 
+	//offset
+	int value; 
+
+	// next pointer 
+	HashNode next; 
+
+	public HashNode(String key, int value) 
+	{ 
+		this.key = key; 
+		this.value = value; 
+	} 
+} 
 
 public class hashload {
 
@@ -29,6 +48,13 @@ public class hashload {
 			  
 			   for(int i = 0; i < numBuckets; i++) 
 				   bucketArray.add(null); 
+		   } 
+		 
+		 private int getBucketIndex(String key) 
+		   { 
+			   int hashCode = key.hashCode(); 
+			   int index = Math.abs(hashCode) % numBuckets; 
+			   return index; 
 		   } 
 		 
 		 public void add(String key, int value) {
@@ -117,10 +143,30 @@ public class hashload {
 	   }
 	 hashload map = new hashload();
 	 long startTime = System.currentTimeMillis();
-	  // map.hashFunction(pageSize);
+	 map.hashFunction(pageSize);
 	 
 	 FileWriter myWriter = new FileWriter("hash."+pageSize);
 
+	 for(int i=0;i<map.bucketArray.size();i++) {
+		   HashNode head = map.bucketArray.get(i);
+
+		   while(head!=null) {
+			   //using delimiters for parsing purposes
+			   myWriter.write(head.key+NODE_DELIMITER+head.value);
+			   myWriter.write("\n");
+			   head=head.next;
+		   }
+		   myWriter.write(BUCKET_DELIMITER);
+		   myWriter.write("\n");
+
+	   }
+	 
 	 myWriter.close();
+	 
+	 long stopTime = System.currentTimeMillis();
+
+	 System.out.println(stopTime - startTime + " ms");
+	 System.out.println((stopTime - startTime) * 0.001 + " sec");
+
 }
 }
