@@ -1,20 +1,27 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.sun.corba.se.impl.ior.ByteBuffer;
 
+//Node class to replicate separate chaining by reading index from file
 class Node 
 { 
 	String key; 
 	int value; 
 
+	// Reference to next node 
 	Node next; 
 
+	// Constructor 
 	public Node(String key, int value) 
 	{ 
 		this.key = key; 
@@ -23,17 +30,15 @@ class Node
 } 
 
 public class hashquery {
+	
 	public static final int RECORD_SIZE = 368; 
 	static final String BUCKET_DELIMITER = "*";
 	static final String NODE_DELIMITER= "///";
-
+	//Array list to store the hash table
 	ArrayList<Node> bucketArray = new ArrayList<Node>();
 	public int numBuckets=0;
 	
-	
-	
 	public static void main(String[] args) throws IOException {
-
 		hashquery ri = new hashquery();
 		long startTime = System.currentTimeMillis();
 		String pageSize = args[args.length - 1];
@@ -52,14 +57,14 @@ public class hashquery {
 		long stopTime = System.currentTimeMillis();
         System.out.println(stopTime - startTime + " ms");
         System.out.println((stopTime - startTime) * 0.001 + " sec");
-	
-		
 	}
-	public void searchForInput(String name,ArrayList<Integer> list, File heap) throws IOException {
 	
+	//function to search for query
+	public void searchForInput(String name,ArrayList<Integer> list, File heap) throws IOException {
 		RandomAccessFile heapRaf = new RandomAccessFile(heap, "r");
 		byte[] record = new byte[368];
 		
+		//run loop until all records are displayed
 		for(int i:list) {
 			heapRaf.seek(i); 
 		    heapRaf.read(record, 0, 368);
@@ -69,7 +74,8 @@ public class hashquery {
 		    
 		    String nameCheck = new String(bname).trim();
 		    
-     if (nameCheck.equals(name)) {
+		    //display records if name matches with query
+	        if (nameCheck.equals(name)) {
 	        	
 	        	byte[] census_year = Arrays.copyOfRange(record, 0, 4);
 	            byte[] block_id = Arrays.copyOfRange(record, 4, 8);
@@ -91,6 +97,9 @@ public class hashquery {
 	            byte[] y_coordinate = Arrays.copyOfRange(record, 334, 338);
 	            byte[] location = Arrays.copyOfRange(record, 338, 368);
 	            
+	            
+	 
+	        	
 	            int Scensus_year = ByteBuffer.wrap(census_year).getInt();
 	            String Sblock_id = new String(block_id);
 	            int Sproperty_id = ByteBuffer.wrap(property_id).getInt();
@@ -111,6 +120,7 @@ public class hashquery {
 	            String Sy_coordinate = new String(y_coordinate);
 	            String Slocation =new String(location);
 	            
+	            
 	            System.out.println("Census year: "+Scensus_year);
 	            System.out.println("Property ID: "+Sproperty_id);
 	            System.out.println("Building name: "+Sbuilding_name);
@@ -120,8 +130,12 @@ public class hashquery {
 	        	}
 	        System.out.println("------------------------------");
 	       }
+	    
+        
+		
 	}
 	
+	//function to get building name from argument
 	public String getBuildingName(String[] args) throws IOException {
 	      String[] buildingNameArray = Arrays.copyOfRange(args, 0, args.length - 1);
 	      String buildingName;
@@ -134,7 +148,7 @@ public class hashquery {
 	      return buildingName;
 	   }
 	
-public void readFile(String pageSize) throws NumberFormatException, IOException {
+	public void readFile(String pageSize) throws NumberFormatException, IOException {
 		
 		File file=new File("hash."+pageSize);    // new file instance  
 		FileReader fr=new FileReader(file);   //read file  
@@ -171,44 +185,45 @@ public void readFile(String pageSize) throws NumberFormatException, IOException 
 		
 	}
 
-public ArrayList <Integer> get(String key) 
-{ 
-	boolean flag=true;
-	ArrayList <Integer> list = new ArrayList<Integer>();
-	// Find head of chain for given key 
-	int bucketIndex = getBucketIndex(key); 
-	Node head = bucketArray.get(bucketIndex); 
+	// Returns list of offsets based on the search query
+	public ArrayList <Integer> get(String key) 
+	{ 
+		boolean flag=true;
+		ArrayList <Integer> list = new ArrayList<Integer>();
+		// Find head of chain for given key 
+		int bucketIndex = getBucketIndex(key); 
+		Node head = bucketArray.get(bucketIndex); 
 
-	// Search key in chain 
-	while (head != null) {   	 
-		if (head.key.equalsIgnoreCase(key)) {
-			list.add(head.value);
+		// Search key in chain 
+		while (head != null) {   	 
+			if (head.key.equalsIgnoreCase(key)) {
+				list.add(head.value);
 
+			}
+			head = head.next; 
+		} 
+
+		if(flag) {
+			Node temphead = bucketArray.get(bucketArray.size()-2);
+			while (temphead != null) {  
+				if (temphead.key.equalsIgnoreCase(key)) {
+					list.add(temphead.value);
+				}    
+				temphead = temphead.next; 
+			} 
 		}
-		head = head.next; 
+
+		// If key not found 
+		return list; 
+	}
+
+
+	//hash function mod using number of buckets
+	private int getBucketIndex(String key) 
+	{ 
+		int hashCode = key.hashCode(); 
+		int index = Math.abs(hashCode) % numBuckets; 
+		return index; 
 	} 
 
-	if(flag) {
-		Node temphead = bucketArray.get(bucketArray.size()-2);
-		while (temphead != null) {  
-			if (temphead.key.equalsIgnoreCase(key)) {
-				list.add(temphead.value);
-			}    
-			temphead = temphead.next; 
-		} 
-	}
-
-	// If key not found 
-	return list; 
 }
-
-private int getBucketIndex(String key) 
-{ 
-	int hashCode = key.hashCode(); 
-	int index = Math.abs(hashCode) % numBuckets; 
-	return index; 
-} 
-	
-	}
-
-	
