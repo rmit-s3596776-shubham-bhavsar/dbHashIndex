@@ -32,6 +32,30 @@ public class hashload {
 		 
 		 public void add(String key, int value) {
 			 int nodecounter=0;
+			 
+			 int bucketIndex = getBucketIndex(key);
+			 
+			 HashNode head = bucketArray.get(bucketIndex);
+			 
+			 while (head != null) { 	 
+				   nodecounter++;
+				   if(nodecounter>17) {
+					   break;
+				   }
+				   head = head.next; 
+			   }
+			 if(nodecounter>17) {
+				   HashNode newhead = bucketArray.get(bucketArray.size()-1);
+				   HashNode newOverflowNode = new HashNode(key, value); 
+				   newOverflowNode.next=newhead;
+				   bucketArray.set(bucketArray.size()-1, newOverflowNode);
+				   
+			   } else {
+				   head = bucketArray.get(bucketIndex); 
+				   HashNode newNode = new HashNode(key, value); 
+				   newNode.next = head; 
+				   bucketArray.set(bucketIndex, newNode); 	   
+			   }       
 			 }
 		 
 		 public void hashFunction(int pageSize) {
