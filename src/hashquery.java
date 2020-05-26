@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -6,30 +8,53 @@ import java.util.Arrays;
 
 import com.sun.corba.se.impl.ior.ByteBuffer;
 
+class Node 
+{ 
+	String key; 
+	int value; 
+
+	Node next; 
+
+	public Node(String key, int value) 
+	{ 
+		this.key = key; 
+		this.value = value; 
+	} 
+} 
+
 public class hashquery {
 	public static final int RECORD_SIZE = 368; 
-	static final String BUCKET_DELIMITER = "#";
-	static final String NODE_DELIMITER= ":::";
+	static final String BUCKET_DELIMITER = "*";
+	static final String NODE_DELIMITER= "///";
 
 	ArrayList<Node> bucketArray = new ArrayList<Node>();
 	public int numBuckets=0;
 	
-	class Node 
-	{ 
-		String key; 
-		int value; 
-
-		Node next; 
-
-		public Node(String key, int value) 
-		{ 
-			this.key = key; 
-			this.value = value; 
-		} 
-	} 
+	
 	
 	public static void main(String[] args) throws IOException {
-}
+
+		hashquery ri = new hashquery();
+		long startTime = System.currentTimeMillis();
+		String pageSize = args[args.length - 1];
+		ri.readFile(pageSize);
+		
+		//extracting building name from argument
+		String buildingName=ri.getBuildingName(args);
+		
+		//loading heap file
+		File heapFile = new File("heap."+pageSize);
+		
+		//search for records
+		ri.searchForInput(buildingName,ri.get(buildingName), heapFile);
+		
+		//timer
+		long stopTime = System.currentTimeMillis();
+        System.out.println(stopTime - startTime + " ms");
+        System.out.println((stopTime - startTime) * 0.001 + " sec");
+	
+		
+	}
 	public void searchForInput(String name,ArrayList<Integer> list, File heap) throws IOException {
 	
 		RandomAccessFile heapRaf = new RandomAccessFile(heap, "r");
@@ -96,6 +121,44 @@ if (nameCheck.equals(name)) {
 	        System.out.println("------------------------------");
 	       }
 	}
+	
+public void readFile(String pageSize) throws NumberFormatException, IOException {
+		
+		File file=new File("hash."+pageSize);    // new file instance  
+		FileReader fr=new FileReader(file);   //read file  
+		BufferedReader br=new BufferedReader(fr);  //buffer character input stream  
+		
+		String line;  
+		String name="";
+		int offset=0;
+		
+		bucketArray.add(null);
+		
+		//loop until reaching end of file
+		while((line=br.readLine())!=null)  
+		{  
+			//increment number of buckets and add a null node to the array list when bucket delimiter is encountered
+			if(line.equalsIgnoreCase(BUCKET_DELIMITER)) {
+				bucketArray.add(null);
+				numBuckets++;
+			}
+			//parse the node and add it to existing bucket/overflow bucket
+			else {
+				name=line.split(NODE_DELIMITER)[0];
+				offset=Integer.parseInt(line.split(NODE_DELIMITER)[1]);
+				//System.out.println(offset);
+				Node head = this.bucketArray.get(numBuckets);
+				Node newNode = new Node(name,offset);
+				newNode.next=head;
+				bucketArray.set(numBuckets, newNode);
+				
+			} 
+
+		}  
+		fr.close();    //closes the stream and release the resources  
+		
+	}
+	
 	}
 
 	

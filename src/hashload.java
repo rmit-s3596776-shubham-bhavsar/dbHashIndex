@@ -27,8 +27,8 @@ public class hashload {
 	static final int RECORD_SIZE = 368;
 	   static final int BUILDINGNAME_SIZE = 65;
 	   static final int BNAME_OFFSET = 16; 
-	   static final String NODE_DELIMITER= ":::";
-	   static final String BUCKET_DELIMITER = "#";
+	   static final String NODE_DELIMITER= "///";
+	   static final String BUCKET_DELIMITER = "*";
 	   int position=-368;
 	   static int currentPositionInHeap = 0; 
 	   static boolean lastRecordFlag = false;  
