@@ -69,7 +69,7 @@ public class hashquery {
 		    
 		    String nameCheck = new String(bname).trim();
 		    
-if (nameCheck.equals(name)) {
+     if (nameCheck.equals(name)) {
 	        	
 	        	byte[] census_year = Arrays.copyOfRange(record, 0, 4);
 	            byte[] block_id = Arrays.copyOfRange(record, 4, 8);
@@ -122,6 +122,18 @@ if (nameCheck.equals(name)) {
 	       }
 	}
 	
+	public String getBuildingName(String[] args) throws IOException {
+	      String[] buildingNameArray = Arrays.copyOfRange(args, 0, args.length - 1);
+	      String buildingName;
+	      
+	      if(buildingNameArray.length == 1) {
+	    	  buildingName = buildingNameArray[0];
+	      } else {
+	    	  buildingName = String.join(" ", buildingNameArray);
+	      }
+	      return buildingName;
+	   }
+	
 public void readFile(String pageSize) throws NumberFormatException, IOException {
 		
 		File file=new File("hash."+pageSize);    // new file instance  
@@ -158,6 +170,44 @@ public void readFile(String pageSize) throws NumberFormatException, IOException 
 		fr.close();    //closes the stream and release the resources  
 		
 	}
+
+public ArrayList <Integer> get(String key) 
+{ 
+	boolean flag=true;
+	ArrayList <Integer> list = new ArrayList<Integer>();
+	// Find head of chain for given key 
+	int bucketIndex = getBucketIndex(key); 
+	Node head = bucketArray.get(bucketIndex); 
+
+	// Search key in chain 
+	while (head != null) {   	 
+		if (head.key.equalsIgnoreCase(key)) {
+			list.add(head.value);
+
+		}
+		head = head.next; 
+	} 
+
+	if(flag) {
+		Node temphead = bucketArray.get(bucketArray.size()-2);
+		while (temphead != null) {  
+			if (temphead.key.equalsIgnoreCase(key)) {
+				list.add(temphead.value);
+			}    
+			temphead = temphead.next; 
+		} 
+	}
+
+	// If key not found 
+	return list; 
+}
+
+private int getBucketIndex(String key) 
+{ 
+	int hashCode = key.hashCode(); 
+	int index = Math.abs(hashCode) % numBuckets; 
+	return index; 
+} 
 	
 	}
 
